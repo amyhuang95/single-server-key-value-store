@@ -3,6 +3,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 import java.net.UnknownHostException;
+import java.text.SimpleDateFormat;
 import java.util.Scanner;
 
 public class TCPClient {
@@ -34,7 +35,9 @@ public class TCPClient {
      * @param message message to be printed
      */
     private void log(String message) {
-        System.out.println("[Client]" + System.currentTimeMillis() + " " + message);
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        String timestamp = df.format(System.currentTimeMillis());
+        System.out.println("[Client]" + timestamp + " " + message);
     }
 
     private static String getUserInput(Scanner scanner) {

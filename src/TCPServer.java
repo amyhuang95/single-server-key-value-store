@@ -3,6 +3,7 @@ import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.text.SimpleDateFormat;
 
 public class TCPServer {
     private KVStore store = new KVStore();
@@ -53,7 +54,9 @@ public class TCPServer {
      * @param message message to be printed
      */
     private void log(String message) {
-        System.out.println("[Server]" + System.currentTimeMillis() + " " + message);
+        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+        String timestamp = df.format(System.currentTimeMillis());
+        System.out.println("[Server]" + timestamp + " " + message);
     }
 
     /**
