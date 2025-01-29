@@ -10,14 +10,18 @@ public class TCPClient {
     public void start(String host, int port) {
         // Set up client
         try (Socket socket = new Socket(host, port)) {
-            System.out.println("[Client]" + System.currentTimeMillis() + " Connected to host: " + host + " port number: " + port);
+            System.out.println("Connected to host: " + host + " port number: " + port);
             DataInputStream in = new DataInputStream(socket.getInputStream());
             DataOutputStream out = new DataOutputStream(socket.getOutputStream());
-            String message = "Message from client";
-            out.writeUTF(message);
-            // Receive server response
-            String response = in.readUTF();
-            log("Received response from server: " + response);
+            log("Key-Value Store Started...Usage: PUT key value | GET key | DELETE key");
+            while (true) {
+                String message = getUserInput(new Scanner(System.in));
+                out.writeUTF(message);
+                log("Sent message to server: " + message);
+                // Receive server response
+                String response = in.readUTF();
+                log("Received response from server: " + response);
+            }
         } catch (UnknownHostException e) {
             log("Unknown host: " + host);
         } catch (IOException e) {
@@ -29,8 +33,18 @@ public class TCPClient {
      * Helper method to print logs in the terminal with current system timestamp to millisecond precision
      * @param message message to be printed
      */
-    private static void log(String message) {
+    private void log(String message) {
         System.out.println("[Client]" + System.currentTimeMillis() + " " + message);
+    }
+
+    private static String getUserInput(Scanner scanner) {
+        String text = null;
+        while (text == null || text.isEmpty() || text.length() > 80) {
+            System.out.print("Enter text: ");
+            text = scanner.nextLine();
+        }
+        scanner.close();
+        return text;
     }
 
     public static void main(String[] args) {
