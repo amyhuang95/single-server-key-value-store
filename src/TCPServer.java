@@ -7,25 +7,7 @@ import java.net.Socket;
 public class TCPServer {
     private KVStore store = new KVStore();
 
-    public void start(String[] args) throws IOException {
-        // Validate that user provided a port number in the command line arguments
-        if (args.length < 1) {
-            System.out.println("Usage: java TCPServer <port number>");
-            System.exit(1);
-        }
-        int port;
-
-        // Validate input port number
-        try {
-            port = Integer.parseInt(args[0]);
-            if (port < 1024 || port > 65535) {
-                throw new IllegalArgumentException("Port number must be between 1024 - 65535.");
-            }
-        } catch (Exception e) {
-            System.out.println("Invalid port number: " + e.getMessage());
-            System.exit(1);
-            return;
-        }
+    public void start(int port) throws IOException {
 
         // Initialize server socket and connection socket to accept client request
         ServerSocket serverSocket = null;
@@ -121,7 +103,25 @@ public class TCPServer {
     }
 
     public static void main(String[] args) throws IOException {
+        // Validate that user provided a port number in the command line arguments
+        if (args.length < 1) {
+            System.out.println("Usage: java TCPServer <port number>");
+            System.exit(1);
+        }
+        int port;
+
+        // Validate input port number
+        try {
+            port = Integer.parseInt(args[0]);
+            if (port < 1024 || port > 65535) {
+                throw new IllegalArgumentException("Port number must be between 1024 - 65535.");
+            }
+        } catch (Exception e) {
+            System.out.println("Invalid port number: " + e.getMessage());
+            System.exit(1);
+            return;
+        }
         TCPServer server = new TCPServer();
-        server.start(args);
+        server.start(port);
     }
 }
