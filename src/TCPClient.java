@@ -37,12 +37,20 @@ public class TCPClient {
             out.writeUTF(message);
             // Receive server response
             String response = in.readUTF();
-            System.out.println("Response from server: " + response);
+            log("Received response from server: " + response);
         } catch (UnknownHostException e) {
-            System.out.println("Unknown host:" + host);
+            log("Unknown host: " + host);
         } catch (IOException e) {
-            System.out.println("IO Error:" + e.getMessage());
+            log("IO Error: " + e.getMessage());
         }
+    }
+
+    /**
+     * Helper method to print logs in the terminal with current system timestamp to millisecond precision
+     * @param message message to be printed
+     */
+    private static void log(String message) {
+        System.out.println("[Client]" + System.currentTimeMillis() + " " + message);
     }
 
 }
