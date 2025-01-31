@@ -8,32 +8,109 @@ import java.text.SimpleDateFormat;
 import java.util.Scanner;
 
 public class TCPClient {
+    private Socket socket;
+    private DataInputStream in;
+    private DataOutputStream out;
 
-    public void start(String host, int port) {
+
+    public void start(String host, int port) throws IOException {
         // Set up client
-        try (Socket socket = new Socket(host, port)) {
+        try {
+            socket = new Socket(host, port);
             socket.setSoTimeout(5000); // Set time out
             System.out.println("Connected to host: " + host + " port number: " + port);
-            DataInputStream in = new DataInputStream(socket.getInputStream());
-            DataOutputStream out = new DataOutputStream(socket.getOutputStream());
+            in = new DataInputStream(socket.getInputStream());
+            out = new DataOutputStream(socket.getOutputStream());
             log("Key-Value Store Started...Usage: PUT key value | GET key | DELETE key");
-            Scanner scanner = new Scanner(System.in);
+
+            // Pre-populate keys and values
+            loadData();
+
+            // Get user input from terminal
             String message;
-            while (!(message = getUserInput(scanner)).isEmpty()) {
-                out.writeUTF(message);
-                log("Sent message to server: " + message);
-                // Receive server response
-                try {
-                    String response = in.readUTF();
-                    log("Received response from server: " + response);
-                } catch (SocketTimeoutException e) {
-                    log("Server timed out");
-                }
+            while (!(message = getUserInput(new Scanner(System.in))).isEmpty()) {
+                sendRequest(message);
             }
         } catch (UnknownHostException e) {
             log("Unknown host: " + host);
         } catch (IOException e) {
             log("IO Error: " + e.getMessage());
+        } finally {
+            if (socket != null) {
+                socket.close();
+            }
+        }
+    }
+
+    /**
+     * Helper method to send message to server and receive response from the server
+     * @param message
+     * @throws IOException
+     * @throws SocketTimeoutException
+     */
+    private void sendRequest(String message) throws IOException, SocketTimeoutException {
+        try {
+            out.writeUTF(message);
+            log("Sent message to server: " + message);
+            // Receive server response
+            try {
+                String response = in.readUTF();
+                log("Received response from server: " + response);
+            } catch (SocketTimeoutException e) {
+                log("Server timed out");
+            }
+        } catch (IOException e) {
+            log("IO Error: " + e.getMessage());
+        }
+    }
+
+    /**
+     * Pre-populate the Key-Value store with data and a set of keys.
+     * @throws IOException
+     */
+    private void loadData() throws IOException {
+        log("Loading data...");
+        String[] messages = {
+                "put apple red",
+                "put banana yellow",
+                "put grape purple",
+                "put orange orange",
+                "put strawberry red",
+                "put blueberry blue",
+                "put kiwi green",
+                "put mango yellow",
+                "put watermelon green",
+                "put pineapple yellow"
+        };
+        for (String message : messages) {
+            sendRequest(message);
+        }
+    }
+
+    /**
+     * Test each operation: 5 PUTs, 5 GETs, 5 DELETEs.
+     * @throws IOException
+     */
+    private void testOperations() throws IOException {
+        String[] requests = {
+                "PUT mango yellow",
+                "PUT kiwi green",
+                "PUT blueberry blue",
+                "PUT watermelon green",
+                "PUT pineapple yellow",
+                "GET apple",
+                "GET banana",
+                "GET grape",
+                "GET orange",
+                "GET strawberry",
+                "DELETE apple",
+                "DELETE banana",
+                "DELETE grape",
+                "DELETE orange",
+                "DELETE strawberry"
+        };
+        for (String request : requests) {
+            sendRequest(request);
         }
     }
 
@@ -56,7 +133,7 @@ public class TCPClient {
         return text;
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException {
         // Validate that user provided a hostname/ip address and a port number in the command line arguments
         if (args.length < 2) {
             System.out.println("Usage:java TCPClient <host name/IP address> <port number>");
