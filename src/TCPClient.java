@@ -2,6 +2,7 @@ import java.io.DataInputStream;
 import java.io.DataOutputStream;
 import java.io.IOException;
 import java.net.Socket;
+import java.net.SocketTimeoutException;
 import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import java.util.Scanner;
@@ -11,17 +12,24 @@ public class TCPClient {
     public void start(String host, int port) {
         // Set up client
         try (Socket socket = new Socket(host, port)) {
+            socket.setSoTimeout(5000); // Set time out
             System.out.println("Connected to host: " + host + " port number: " + port);
             DataInputStream in = new DataInputStream(socket.getInputStream());
             DataOutputStream out = new DataOutputStream(socket.getOutputStream());
             log("Key-Value Store Started...Usage: PUT key value | GET key | DELETE key");
             Scanner scanner = new Scanner(System.in);
-            String message = getUserInput(scanner);
-            out.writeUTF(message);
-            log("Sent message to server: " + message);
-            // Receive server response
-            String response = in.readUTF();
-            log("Received response from server: " + response);
+            String message;
+            while (!(message = getUserInput(scanner)).isEmpty()) {
+                out.writeUTF(message);
+                log("Sent message to server: " + message);
+                // Receive server response
+                try {
+                    String response = in.readUTF();
+                    log("Received response from server: " + response);
+                } catch (SocketTimeoutException e) {
+                    log("Server timed out");
+                }
+            }
         } catch (UnknownHostException e) {
             log("Unknown host: " + host);
         } catch (IOException e) {

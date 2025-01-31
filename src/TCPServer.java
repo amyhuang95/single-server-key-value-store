@@ -26,15 +26,17 @@ public class TCPServer {
                 DataInputStream in = new DataInputStream(connectionSocket.getInputStream());
                 DataOutputStream out = new DataOutputStream(connectionSocket.getOutputStream());
                 // Get input from client
-                String data = in.readUTF();
-                log("Received request of length " + data.length() + " from " + connectionSocket.getInetAddress() + ":" + connectionSocket.getPort() + "\n Data: " + data);
-                // Process client request and send it back
-                try {
-                    String output = processRequest(data);
-                    out.writeUTF(output);
-                } catch (IllegalArgumentException e) {
-                    log("Received malformed request of length " + data.length() + " from " + connectionSocket.getInetAddress() + ":" + connectionSocket.getPort());
-                    out.writeUTF(e.getMessage());
+                String data;
+                while ((data = in.readUTF()) != null) {
+                    log("Received request of length " + data.length() + " from " + connectionSocket.getInetAddress() + ":" + connectionSocket.getPort() + "\n Data: " + data);
+                    // Process client request and send it back
+                    try {
+                        String output = processRequest(data);
+                        out.writeUTF(output);
+                    } catch (IllegalArgumentException e) {
+                        log("Received malformed request of length " + data.length() + " from " + connectionSocket.getInetAddress() + ":" + connectionSocket.getPort());
+                        out.writeUTF(e.getMessage());
+                    }
                 }
             }
         } catch (IOException e) {
