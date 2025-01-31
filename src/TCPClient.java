@@ -15,14 +15,13 @@ public class TCPClient {
             DataInputStream in = new DataInputStream(socket.getInputStream());
             DataOutputStream out = new DataOutputStream(socket.getOutputStream());
             log("Key-Value Store Started...Usage: PUT key value | GET key | DELETE key");
-            while (true) {
-                String message = getUserInput(new Scanner(System.in));
-                out.writeUTF(message);
-                log("Sent message to server: " + message);
-                // Receive server response
-                String response = in.readUTF();
-                log("Received response from server: " + response);
-            }
+            Scanner scanner = new Scanner(System.in);
+            String message = getUserInput(scanner);
+            out.writeUTF(message);
+            log("Sent message to server: " + message);
+            // Receive server response
+            String response = in.readUTF();
+            log("Received response from server: " + response);
         } catch (UnknownHostException e) {
             log("Unknown host: " + host);
         } catch (IOException e) {
@@ -37,16 +36,15 @@ public class TCPClient {
     private void log(String message) {
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         String timestamp = df.format(System.currentTimeMillis());
-        System.out.println("[Client]" + timestamp + " " + message);
+        System.out.println("[Client] " + timestamp + " " + message);
     }
 
-    private static String getUserInput(Scanner scanner) {
+    private String getUserInput(Scanner scanner) {
         String text = null;
         while (text == null || text.isEmpty() || text.length() > 80) {
             System.out.print("Enter text: ");
             text = scanner.nextLine();
         }
-        scanner.close();
         return text;
     }
 
