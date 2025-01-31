@@ -26,6 +26,9 @@ public class TCPClient {
             // Pre-populate keys and values
             loadData();
 
+            // Test 5 of each operation (PUT, GET, DELETE)
+            testOperations();
+
             // Get user input from terminal
             String message;
             while (!(message = getUserInput(new Scanner(System.in))).isEmpty()) {
@@ -78,7 +81,7 @@ public class TCPClient {
                 "put strawberry red",
                 "put blueberry blue",
                 "put kiwi green",
-                "put mango yellow",
+                "put dragon_fruit yellow",
                 "put watermelon green",
                 "put pineapple yellow"
         };
@@ -93,21 +96,29 @@ public class TCPClient {
      */
     private void testOperations() throws IOException {
         String[] requests = {
-                "PUT mango yellow",
-                "PUT kiwi green",
-                "PUT blueberry blue",
-                "PUT watermelon green",
-                "PUT pineapple yellow",
-                "GET apple",
-                "GET banana",
-                "GET grape",
-                "GET orange",
-                "GET strawberry",
-                "DELETE apple",
-                "DELETE banana",
-                "DELETE grape",
-                "DELETE orange",
-                "DELETE strawberry"
+                "GET apple", // get existing key
+                "GET banana", // get existing key
+                "get mango", // get non-existing key
+                "PUT mango yellow", // add new key
+                "get mango", // get newly added key
+                "put kiwi green", // add new key
+                "get kiwi green", // wrong command
+                "geT kiwi", // get newly added key
+                "xxx", // malformed request
+                "put", // malformed request
+                "get", // malformed request
+                "PUT kiwi yellow", // overwrite existing key
+                "get kiwi", // get modified key
+                "DELETE apple", // delete existing key
+                "get apple", // get deleted key
+                "DELETE apple", // delete non-existing key
+                "DELETE grape", // delete existing key
+                "DELETE orange", // delete existing key
+                "DELETE kiwi", // delete newly added key
+                "PUT watermelon green red", // malformed request
+                "PUT lemon yellow", // add new key
+                "put watermelon blue", // modified existing key
+                "GET strawberry", // get existing key
         };
         for (String request : requests) {
             sendRequest(request);
