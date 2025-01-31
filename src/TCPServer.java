@@ -6,7 +6,7 @@ import java.net.Socket;
 import java.text.SimpleDateFormat;
 
 public class TCPServer {
-    private KVStore store = new KVStore();
+    private final KVStore store = new KVStore();
 
     public void start(int port) throws IOException {
 
@@ -25,10 +25,10 @@ public class TCPServer {
                 // Set up input and output streams
                 DataInputStream in = new DataInputStream(connectionSocket.getInputStream());
                 DataOutputStream out = new DataOutputStream(connectionSocket.getOutputStream());
-                // Get input from client
+                // Continue to listen for client requests
                 String data;
                 while ((data = in.readUTF()) != null) {
-                    log("Received request of length " + data.length() + " from " + connectionSocket.getInetAddress() + ":" + connectionSocket.getPort() + "\n Data: " + data);
+                    log("Received request of length " + data.length() + " from " + connectionSocket.getInetAddress() + ":" + connectionSocket.getPort());
                     // Process client request and send it back
                     try {
                         String output = processRequest(data);
