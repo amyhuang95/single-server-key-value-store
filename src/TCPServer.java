@@ -17,23 +17,24 @@ public class TCPServer {
         try {
             // Set up the server socket
             serverSocket = new ServerSocket(port);
-            log("Server listening on port: " + port);
+            log("Listening on port:" + port);
             // Listen for client requests until manually stopped
             while (true) {
                 connectionSocket = serverSocket.accept();
-                log("Client connected: " + connectionSocket.getInetAddress());
+                log("Connected to client at " + connectionSocket.getInetAddress().toString().substring(1));
                 // Set up input and output streams
                 DataInputStream in = new DataInputStream(connectionSocket.getInputStream());
                 DataOutputStream out = new DataOutputStream(connectionSocket.getOutputStream());
                 // Get input from client
                 String data = in.readUTF();
-                log("Received request of length " + data.length() + "from " + connectionSocket.getInetAddress() + ":" + connectionSocket.getPort() + "\n" + data);
+                log("Received request of length " + data.length() + " from " + connectionSocket.getInetAddress() + ":" + connectionSocket.getPort() + "\n Data: " + data);
                 // Process client request and send it back
                 try {
                     String output = processRequest(data);
                     out.writeUTF(output);
                 } catch (IllegalArgumentException e) {
-                    log("Received malformed request of length " + data.length() + "from " + connectionSocket.getInetAddress() + ":" + connectionSocket.getPort() + "\n Message: " + e.getMessage());
+                    log("Received malformed request of length " + data.length() + " from " + connectionSocket.getInetAddress() + ":" + connectionSocket.getPort());
+                    out.writeUTF(e.getMessage());
                 }
             }
         } catch (IOException e) {
@@ -56,7 +57,7 @@ public class TCPServer {
     private void log(String message) {
         SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
         String timestamp = df.format(System.currentTimeMillis());
-        System.out.println("[Server]" + timestamp + " " + message);
+        System.out.println("[Server] " + timestamp + " " + message);
     }
 
     /**
