@@ -20,33 +20,39 @@ public class TCPServer {
             log("Listening on port:" + port);
             // Listen for client requests until manually stopped
             while (true) {
-                connectionSocket = serverSocket.accept();
-                log("Connected to client at " + connectionSocket.getInetAddress().toString().substring(1));
-                // Set up input and output streams
-                DataInputStream in = new DataInputStream(connectionSocket.getInputStream());
-                DataOutputStream out = new DataOutputStream(connectionSocket.getOutputStream());
-                // Continue to listen for client requests
-                String data;
-                while ((data = in.readUTF()) != null) {
-                    log("Received request of length " + data.length() + " from " + connectionSocket.getInetAddress() + ":" + connectionSocket.getPort());
-                    // Process client request and send it back
-                    try {
-                        String output = processRequest(data);
-                        out.writeUTF(output);
-                    } catch (IllegalArgumentException e) {
-                        log("Received malformed request of length " + data.length() + " from " + connectionSocket.getInetAddress() + ":" + connectionSocket.getPort());
-                        out.writeUTF(e.getMessage());
+                try {
+                    connectionSocket = serverSocket.accept();
+                    log("Connected to client at " + connectionSocket.getInetAddress().toString().substring(1));
+                    // Set up input and output streams
+                    DataInputStream in = new DataInputStream(connectionSocket.getInputStream());
+                    DataOutputStream out = new DataOutputStream(connectionSocket.getOutputStream());
+                    // Continue to listen for client requests
+                    String data;
+                    while ((data = in.readUTF()) != null) {
+                        log("Received request of length " + data.length() + " from " + connectionSocket.getInetAddress() + ":" + connectionSocket.getPort());
+                        // Process client request and send it back
+                        try {
+                            String output = processRequest(data);
+                            out.writeUTF(output);
+                        } catch (IllegalArgumentException e) {
+                            log("Received malformed request of length " + data.length() + " from " + connectionSocket.getInetAddress() + ":" + connectionSocket.getPort());
+                            out.writeUTF(e.getMessage());
+                        }
+                    }
+                    log("Client disconnected: " + connectionSocket.getInetAddress().toString().substring(1));
+                } catch (IOException e) {
+                    log("Client connection error: " + e.getMessage());
+                } finally {
+                    if (connectionSocket != null) {
+                        connectionSocket.close();
                     }
                 }
             }
         } catch (IOException e) {
-            log("Error while listening on port " + port + ": " + e.getMessage());
+            log("Server error while listening on port: " + port);
         } finally {
             if (serverSocket != null) {
                 serverSocket.close();
-            }
-            if (connectionSocket != null) {
-                connectionSocket.close();
             }
         }
 
