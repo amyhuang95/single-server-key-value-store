@@ -1,43 +1,68 @@
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.SocketException;
+import java.net.InetAddress;
 
-public class UDPServer {
-    public static void main(String[] args) {
-        DatagramSocket aSocket = null;
+/**
+ * This class represents communication server using UDP protocol.
+ */
+public class UDPServer implements CommunicationServer {
+    private DatagramSocket socket;
+    private InetAddress lastClientIp;
+    private int lastClientPort;
+    private DatagramPacket packet;
 
-        // Check if the port number is passed as a command-line argument, exit the program if not.
-        if (args.length < 1) {
-            System.out.println("Usage: java UDPServer <Port Number>");
-            System.exit(1);
+    /**
+     * Constructor for a UDP server.
+     *
+     * @param port port number to listen for requests
+     * @throws IOException when failed to create a UDP server
+     */
+    public UDPServer(int port) throws IOException {
+        socket = new DatagramSocket(port);
+        log("Listening on port: " + port);
+    }
+
+    @Override
+    public void start() throws IOException {
+        // No persistent connection
+    }
+
+    @Override
+    public void send(String message) throws IOException {
+        byte[] buffer = message.getBytes();
+        DatagramPacket packet;
+        if (lastClientIp != null) {
+            packet = new DatagramPacket(buffer, buffer.length, lastClientIp, lastClientPort);
+        } else {
+            throw new IOException("No destination address specified");
         }
-        try {
-            // Step 1: Socket binding and buffer initialization
-            // Get the port number from command-line
-            int socket_no = Integer.parseInt(args[0]);
-            // Create a socket bound to the port number provided from the argument
-            aSocket = new DatagramSocket(socket_no);
-            // Initialize a buffer to hold incoming packet data
-            byte[] buffer = new byte[1000];
+        socket.send(packet);
+    }
 
-            // Step 2 (main program): Listen for packets continuously
-            while (true) {
-                // Create a packet with the data to be transferred and its length to be received by the socket
-                DatagramPacket request = new DatagramPacket(buffer,
-                        buffer.length);
-                aSocket.receive(request); // blocks execution until a packet arrives
+    @Override
+    public String receive() throws IOException {
+        byte[] buffer = new byte[1024];
+        packet = new DatagramPacket(buffer, buffer.length);
+        socket.receive(packet);
+        // update dest ip and port
+        lastClientIp = packet.getAddress();
+        lastClientPort = packet.getPort();
+        return new String(packet.getData(), 0, packet.getLength());
+    }
 
-                // Create a packet using the data from the request and its information, then send it to the socket
-                DatagramPacket reply = new DatagramPacket(request.getData(),
-                        request.getLength(), request.getAddress(),
-                        request.getPort());
-                aSocket.send(reply); // echo back the data
-            }
-        } catch (SocketException e) {
-            System.out.println("Socket: " + e.getMessage());
-        } catch (IOException e) {
-            System.out.println("IO: " + e.getMessage());
-        } finally {
-            if (aSocket != null)
-                aSocket.close();
+    @Override
+    public void close() {
+        socket.close();
+    }
+
+    @Override
+    public String getConnectionAddress() {
+        return lastClientIp.getHostAddress() + ":" + lastClientPort;
+    }
+
+    @Override
+    public void log(String message) {
+        Utils.log("UDP Server", message);
+    }
+}
