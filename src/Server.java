@@ -78,7 +78,6 @@ public class Server {
                         String command = tokens[0];
                         String key = tokens[1];
                         String value = tokens[2];
-                        server.log("Tokens" + Arrays.toString(tokens));
                         response = processRequest(command, key, value);
                     } catch (IllegalArgumentException e) {
                         // Send back error message if request is malformed

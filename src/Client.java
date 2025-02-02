@@ -29,8 +29,8 @@ public class Client {
             } else if (protocol.equals("UDP")) {
                 client = new UDPClient(host, port);
             }
-        } catch (Exception e) {
-            Utils.log(serviceName, e.getMessage());
+        } catch (IOException e) {
+            Utils.log(serviceName, "Error starting client.");
         }
         reqId = 0;
     }
@@ -107,13 +107,13 @@ public class Client {
             message = "id:" + reqId + " " + message;
             // Send message to server
             client.send(message);
-            client.log("Sent to server: " + message);
+            client.log("Sent to server:\n" + message);
             // Receive response from server
             try {
                 String response = client.receive();
                 // Validate request id of the response
                 if (validRequestId(response)) {
-                    client.log("Response from server: " + response);
+                    client.log("Response from server:\n" + response);
                 } else {
                     client.log("Received unsolicited response of length " + response.length() + " from server.");
                 }
@@ -121,7 +121,7 @@ public class Client {
                 client.log("Server response timeout. Moving to next request...");
             }
         } catch (IOException e) {
-            client.log("IO Error: " + e.getMessage());
+            client.log("Server connection error. Please restart the client.");
         }
         reqId++;
     }
